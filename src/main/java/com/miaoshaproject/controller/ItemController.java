@@ -3,12 +3,14 @@ package com.miaoshaproject.controller;
 import com.miaoshaproject.controller.viewobject.ItemVo;
 import com.miaoshaproject.error.BusinessException;
 import com.miaoshaproject.response.CommonReturnType;
+import com.miaoshaproject.service.PromoService;
 import com.miaoshaproject.service.impl.ItemServiceImpl;
 import com.miaoshaproject.service.model.ItemModel;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +25,12 @@ public class ItemController extends BaseController {
 
     @Autowired
     private ItemServiceImpl itemService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    @Autowired
+    private PromoService promoService;
 
     //录入商品
     @RequestMapping(value = "/create",method = {RequestMethod.POST},consumes = {CONTENT_TYPE_FORMED})
@@ -57,6 +65,13 @@ public class ItemController extends BaseController {
         return CommonReturnType.create(itemVo);
     }
 
+    //发布秒杀活动,将商品库存同步到redis缓存中
+    @RequestMapping(value = "/publicPromo",method = {RequestMethod.GET})
+    @ResponseBody
+    public CommonReturnType publicPromo(@RequestParam(name = "id")Integer id){
+        promoService.publishPromo(id);
+        return CommonReturnType.create(null);
+    }
     //商品列表页浏览
     @RequestMapping(value = "/list",method = {RequestMethod.GET})
     @ResponseBody
