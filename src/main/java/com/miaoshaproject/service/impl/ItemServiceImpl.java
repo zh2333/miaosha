@@ -12,6 +12,7 @@ import com.miaoshaproject.service.model.ItemModel;
 import com.miaoshaproject.service.model.PromoModel;
 import com.miaoshaproject.validator.ValidationResult;
 import com.miaoshaproject.validator.ValidatorImpl;
+import jdk.nashorn.internal.ir.FunctionNode;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -37,6 +38,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Autowired(required = false)
     private PromoService promoService;
+
 
     @Autowired
     private RedisTemplate redisTemplate;
@@ -127,8 +129,12 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public boolean decreaseStock(Integer itemId, Integer amount) {
-        int affectedRow = itemStockDoMapper.decreaseStock(itemId,amount);
-        if(affectedRow > 0){
+//        int affectedRow = itemStockDoMapper.decreaseStock(itemId,amount);
+
+        //先从redis中减库存,再将redis中的库存和mysql数据库中的库存进行同步
+
+        long result = redisTemplate.opsForValue().increment("promo_item_stock_"+itemId,amount*-1);
+        if(result >= 0){
             //更新库存成功
             return true;
         }else {

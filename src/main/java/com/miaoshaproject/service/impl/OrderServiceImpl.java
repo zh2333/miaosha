@@ -14,6 +14,7 @@ import com.miaoshaproject.service.model.OrderModel;
 import com.miaoshaproject.service.model.UserModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,8 @@ public class OrderServiceImpl implements OrderService {
     private OrderDoMapper orderDoMapper;
     @Autowired(required = false)
     private SequenceDoMapper sequenceDoMapper;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
 
     @Override
